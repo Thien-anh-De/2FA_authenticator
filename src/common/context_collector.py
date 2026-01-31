@@ -3,10 +3,7 @@
 from datetime import datetime
 import random
 
-# ===============================
 # USER BEHAVIOR PROFILE
-# (học từ login_history.csv)
-# ===============================
 USER_PROFILES = {
     "nguyen.hoang.thienanh": {
         "known_ips": ["113.190.45.23", "113.190.45.24"],  # Hà Nội

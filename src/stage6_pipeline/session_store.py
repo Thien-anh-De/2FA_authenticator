@@ -5,7 +5,7 @@ import os
 from datetime import datetime, timedelta
 
 SESSION_PATH = "data/session_store.csv"
-SESSION_TIMEOUT_SECONDS = 5 # 1 phút
+SESSION_TIMEOUT_SECONDS = 60 # 1 phút
 
 
 def _ensure_file():
@@ -64,7 +64,7 @@ def get_last_session(user_id):
     return None
 
 
-# ✅ HÀM BỊ THIẾU – DÙNG CHO PIPELINE
+#  HÀM DÙNG CHO PIPELINE
 def get_session_status(user_id):
     session = get_last_session(user_id)
     if not session:
