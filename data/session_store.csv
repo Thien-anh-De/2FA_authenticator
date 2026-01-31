@@ -1,2 +1,2 @@
-user_id,status,last_update
-nguyen.hoang.thienanh,ALLOW,2026-01-30T15:27:34.763409
+user_id,login_time,last_activity,status
+nguyen.hoang.thienanh,2026-01-31T11:48:32.260276,2026-01-31T11:59:45.324583,EXPIRED

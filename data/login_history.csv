@@ -1,0 +1,7 @@
+timestamp,user_id,ip_address,device_id,login_hour,risk_score,decision,result
+2026-01-31T11:36:00.640487,nguyen.hoang.thienanh,113.190.45.23,Edge_Windows_10,10,0,ALLOW,SUCCESS
+2026-01-31T11:48:32.261277,nguyen.hoang.thienanh,113.190.45.24,Chrome_Windows_10,11,0,ALLOW,SUCCESS
+2026-01-31T11:49:29.454290,nguyen.hoang.thienanh,113.190.45.24,Edge_Windows_10,17,0,ALLOW,SUCCESS
+2026-01-31T11:50:01.210093,nguyen.hoang.thienanh,10.0.79.225,Unknown_Device,2,100,BLOCK,BLOCKED
+2026-01-31T11:54:48.312200,nguyen.hoang.thienanh,113.190.45.23,Chrome_Windows_10,8,20,ALLOW,SUCCESS
+2026-01-31T11:58:45.009555,nguyen.hoang.thienanh,113.190.45.24,Edge_Windows_10,14,0,ALLOW,SUCCESS

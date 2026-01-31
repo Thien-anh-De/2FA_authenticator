@@ -1,32 +1,83 @@
-#lưu trạng thái user
-import pandas as pd
-from datetime import datetime
+# src/stage6_pipeline/session_store.py
 
-SESSION_FILE = "data/session_store.csv"
+import csv
+import os
+from datetime import datetime, timedelta
+
+SESSION_PATH = "data/session_store.csv"
+SESSION_TIMEOUT_SECONDS = 5 # 1 phút
 
 
-def update_session(user_id, status):
-    df = pd.read_csv(SESSION_FILE)
+def _ensure_file():
+    if not os.path.exists(SESSION_PATH) or os.path.getsize(SESSION_PATH) == 0:
+        with open(SESSION_PATH, "w", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f)
+            writer.writerow([
+                "user_id",
+                "login_time",
+                "last_activity",
+                "status"
+            ])
 
-    df = df[df["user_id"] != user_id]
 
-    df = pd.concat([
-        df,
-        pd.DataFrame([{
+def update_session(user_id, status="ACTIVE"):
+    _ensure_file()
+    now = datetime.now().isoformat()
+
+    with open(SESSION_PATH, "r", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        rows = list(reader)
+
+    updated = False
+    for row in rows:
+        if row["user_id"] == user_id:
+            row["last_activity"] = now
+            row["status"] = status
+            updated = True
+
+    if not updated:
+        rows.append({
             "user_id": user_id,
-            "status": status,
-            "last_update": datetime.now().isoformat()
-        }])
-    ], ignore_index=True)
+            "login_time": now,
+            "last_activity": now,
+            "status": status
+        })
 
-    df.to_csv(SESSION_FILE, index=False)
+    with open(SESSION_PATH, "w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(
+            f,
+            fieldnames=["user_id", "login_time", "last_activity", "status"]
+        )
+        writer.writeheader()
+        writer.writerows(rows)
 
 
-def get_session_status(user_id):
-    df = pd.read_csv(SESSION_FILE)
-    row = df[df["user_id"] == user_id]
-
-    if row.empty:
+def get_last_session(user_id):
+    if not os.path.exists(SESSION_PATH):
         return None
 
-    return row.iloc[0]["status"]
+    with open(SESSION_PATH, "r", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            if row["user_id"] == user_id:
+                return row
+    return None
+
+
+# ✅ HÀM BỊ THIẾU – DÙNG CHO PIPELINE
+def get_session_status(user_id):
+    session = get_last_session(user_id)
+    if not session:
+        return None
+    return session.get("status")
+
+
+def is_session_expired(user_id) -> bool:
+    session = get_last_session(user_id)
+    if not session:
+        return True
+
+    last_time = datetime.fromisoformat(session["last_activity"])
+    return datetime.now() - last_time > timedelta(
+        seconds=SESSION_TIMEOUT_SECONDS
+    )

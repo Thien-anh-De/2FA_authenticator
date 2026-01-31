@@ -1,31 +1,46 @@
-#xử lý dữ liệu
-import pandas as pd
+import csv
+import os
 from datetime import datetime
-from src.stage6_pipeline.session_store import get_session_status
 
-DATA_FILE = "data/data_events.csv"
+from src.stage6_pipeline.session_store import (
+    is_session_expired,
+    get_session_status,
+    update_session
+)
+
+DATA_EVENTS_PATH = "data/data_events.csv"
 
 
-def send_event(user_id, event):
-    status = get_session_status(user_id)
+def send_event(user_id, event_name):
+    """
+    Ghi event sau khi login
+    """
 
-    print(f"[PIPELINE] User={user_id} | Status={status}")
-
-    if status not in ["ALLOW", "OTP_VERIFIED"]:
-        print("⛔ Data blocked by security policy")
+    # ⛔ Session timeout
+    if is_session_expired(user_id):
+        print("\n⛔ SESSION TIMEOUT")
+        print("👉 Your session has expired. Please login again.\n")
+        update_session(user_id, "EXPIRED")
         return False
 
-    df = pd.read_csv(DATA_FILE)
+    status = get_session_status(user_id)
+    if status not in ["ALLOW", "OTP_VERIFIED"]:
+        print("⛔ Invalid session state.")
+        return False
 
-    df = pd.concat([
-        df,
-        pd.DataFrame([{
-            "user_id": user_id,
-            "event": event,
-            "timestamp": datetime.now().isoformat()
-        }])
-    ], ignore_index=True)
+    file_exists = os.path.exists(DATA_EVENTS_PATH)
 
-    df.to_csv(DATA_FILE, index=False)
-    print("✅ Data accepted")
+    with open(DATA_EVENTS_PATH, "a", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+
+        if not file_exists or os.path.getsize(DATA_EVENTS_PATH) == 0:
+            writer.writerow(["user_id", "event", "timestamp"])
+
+        writer.writerow([
+            user_id,
+            event_name,
+            datetime.now().isoformat()
+        ])
+
+    print("📦 Event recorded successfully")
     return True
