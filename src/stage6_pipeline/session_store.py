@@ -1,5 +1,3 @@
-# src/stage6_pipeline/session_store.py
-
 import csv
 import os
 from datetime import datetime, timedelta

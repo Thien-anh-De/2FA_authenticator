@@ -6,7 +6,7 @@ from src.stage6_pipeline.session_store import (
     is_session_expired
 )
 
-# ⚠️ CHỈ IMPORT RUNTIME HISTORY
+# IMPORT RUNTIME HISTORY
 from src.stage4_risk_engine.risk_engine import (
     load_runtime_history,
     successful_login_count
@@ -34,23 +34,17 @@ def login_ui():
 
     user_id = input("Username: ")
 
-    # ==================================================
     # 1️⃣ SYSTEM CONTEXT (NO DEMO)
-    # ==================================================
     base_context = collect_context(
         user_id=user_id,
         demo_mode=False
     )
 
-    # ==================================================
-    # 2️⃣ TRUST CHECK (RUNTIME HISTORY)
-    # ==================================================
+    # TRUST CHECK (RUNTIME HISTORY)
     df = load_runtime_history()
     success_count = successful_login_count(df, user_id)
 
-    # ==================================================
     # TRUSTED USER (>= 3 SUCCESS)
-    # ==================================================
     if success_count >= 3:
         print("\n[System detected]")
         print("User status : TRUSTED USER")
@@ -63,10 +57,7 @@ def login_ui():
             "login_hour": base_context["login_hour"]
             # ❌ KHÔNG note → risk engine không ép OTP
         }
-
-    # ==================================================
     # NEW USER → ADAPTIVE AUTH (KHÔNG ÉP OTP)
-    # ==================================================
     if base_context.get("note") == "new_user":
         print("\n[System detected]")
         print("User status : NEW USER")
@@ -79,9 +70,7 @@ def login_ui():
             "login_hour": base_context["login_hour"]
         }
 
-    # ==================================================
     # UNTRUSTED USER → DEMO SCENARIO
-    # ==================================================
     scenario = choose_demo_scenario()
 
     demo_context = collect_context(

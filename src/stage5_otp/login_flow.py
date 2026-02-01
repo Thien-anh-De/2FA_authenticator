@@ -58,9 +58,7 @@ def login(user_login: dict) -> bool:
     print(f"Risk score: {risk}")
     print(f"Decision  : {decision}")
 
-    # ===============================
     # ALLOW
-    # ===============================
     if decision == "ALLOW":
         update_session(user_login["user_id"], "ALLOW")
 
@@ -71,9 +69,7 @@ def login(user_login: dict) -> bool:
         print("✅ Login success (no OTP)")
         return True
 
-    # ===============================
     # BLOCK
-    # ===============================
     if decision == "BLOCK":
         update_session(user_login["user_id"], "BLOCK")
 
@@ -84,9 +80,7 @@ def login(user_login: dict) -> bool:
         print("⛔ Login blocked")
         return False
 
-    # ===============================
     # OTP
-    # ===============================
     if decision == "OTP":
         print("🔐 OTP required")
 

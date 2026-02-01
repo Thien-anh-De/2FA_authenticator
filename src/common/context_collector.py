@@ -1,7 +1,7 @@
 from datetime import datetime
 import random
 
-# USER BEHAVIOR PROFILE (STATIC – CHỈ ĐỂ DEMO)
+# USER BEHAVIOR PROFILE
 USER_PROFILES = {
     "nguyen.hoang.thienanh": {
         "known_ips": ["113.190.45.23", "113.190.45.24"],
@@ -28,9 +28,7 @@ def collect_context(user_id, scenario=None, demo_mode=False):
 
     profile = USER_PROFILES.get(user_id)
 
-    # ===============================
-    # USER MỚI (KHÔNG PROFILE)
-    # ===============================
+    # USER MỚI
     if profile is None:
         return {
             "ip_address": "10.0.79.225",
@@ -39,9 +37,7 @@ def collect_context(user_id, scenario=None, demo_mode=False):
             "note": "new_user"
         }
 
-    # ===============================
-    # DEMO MODE (CHỈ DÙNG KHI DEMO)
-    # ===============================
+    # DEMO MODE
     if demo_mode:
         if scenario == "normal":
             return {
@@ -67,9 +63,7 @@ def collect_context(user_id, scenario=None, demo_mode=False):
                 "note": "high_risk_attack"
             }
 
-    # ===============================
-    # SYSTEM MODE (LOGIN BÌNH THƯỜNG)
-    # ===============================
+    # SYSTEM MODE
     return {
         "ip_address": random.choice(profile["known_ips"]),
         "device_id": random.choice(profile["known_devices"]),

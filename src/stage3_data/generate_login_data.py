@@ -10,9 +10,7 @@ sys.path.append(os.path.abspath("."))
 from src.common.config import DATA_PATH
 
 
-# ===============================
-# USERS - NGƯỜI THẬT
-# ===============================
+# USERS
 USERS = {
     "nguyen.hoang.thienanh": {
         "known_ips": ["113.190.45.23", "113.190.45.24"],  # Hà Nội

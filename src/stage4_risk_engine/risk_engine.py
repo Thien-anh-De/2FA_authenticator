@@ -5,16 +5,12 @@ from datetime import datetime
 
 sys.path.append(os.path.abspath("."))
 
-# ===============================
 # PATH CONFIG
-# ===============================
-RAW_HISTORY_PATH = "data/raw/login_history.csv"      # dữ liệu hành vi nền (demo)
-RUNTIME_HISTORY_PATH = "data/login_history.csv"      # dữ liệu runtime (trust)
+RAW_HISTORY_PATH = "data/raw/login_history.csv"    
+RUNTIME_HISTORY_PATH = "data/login_history.csv"      
 
 
-# ===============================
 # LOAD HISTORY
-# ===============================
 def load_raw_history():
     if not os.path.exists(RAW_HISTORY_PATH) or os.path.getsize(RAW_HISTORY_PATH) == 0:
         return pd.DataFrame()
@@ -27,9 +23,7 @@ def load_runtime_history():
     return pd.read_csv(RUNTIME_HISTORY_PATH)
 
 
-# ===============================
-# CHECK FUNCTIONS (DÙNG RAW)
-# ===============================
+# CHECK FUNCTIONS 
 def is_new_ip(df_raw, user, ip):
     if df_raw.empty:
         return True
@@ -61,9 +55,7 @@ def is_unusual_time(df_raw, user, login_hour):
     return abs(hours.mean() - login_hour) > 6
 
 
-# ===============================
-# CHECK FUNCTIONS (DÙNG RUNTIME)
-# ===============================
+# CHECK FUNCTIONS
 def too_many_fails(df_runtime, user):
     if df_runtime.empty or "result" not in df_runtime.columns:
         return False
@@ -85,9 +77,7 @@ def successful_login_count(df_runtime, user):
     ).sum()
 
 
-# ===============================
-# RISK ENGINE CORE (FINAL – CHUẨN BTL)
-# ===============================
+# RISK ENGINE CORE 
 def calculate_risk(login_event):
     df_raw = load_raw_history()          # baseline behavior
     df_runtime = load_runtime_history()  # trust & otp history
@@ -97,27 +87,21 @@ def calculate_risk(login_event):
 
     success_count = successful_login_count(df_runtime, user)
 
-    # ==================================================
-    # 1️⃣ TRUSTED USER (>= 3 SUCCESS)
-    # ==================================================
+    # TRUSTED USER (>= 3 SUCCESS)
     if success_count >= 3:
         # chỉ OTP nhẹ nếu spam fail
         if too_many_fails(df_runtime, user):
             return 30
         return 0
 
-    # ==================================================
-    # 2️⃣ DEMO OVERRIDE (CHỈ DÙNG KHI DEMO)
-    # ==================================================
+    # DEMO OVERRIDE (CHỈ DÙNG KHI DEMO)
     if note == "high_risk_attack":
         return 90          # BLOCK (demo)
 
     if note == "unusual_device_or_time":
         return 50          # OTP (demo)
 
-    # ==================================================
-    # 3️⃣ USER CHƯA TRUST → TÍNH RISK TỪ RAW
-    # ==================================================
+    # USER CHƯA TRUST → TÍNH RISK TỪ RAW
     risk = 0
 
     if is_new_ip(df_raw, user, login_event["ip_address"]):
@@ -132,9 +116,7 @@ def calculate_risk(login_event):
     if too_many_fails(df_runtime, user):
         risk += 30
 
-    # ==================================================
-    # 4️⃣ USER CHƯA TRUST → KHÔNG BAO GIỜ BLOCK
-    # ==================================================
+    # USER CHƯA TRUST → KHÔNG BAO GIỜ BLOCK
     risk = min(risk, 50)   # trần OTP
 
     return risk
