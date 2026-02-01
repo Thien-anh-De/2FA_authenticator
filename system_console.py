@@ -6,12 +6,11 @@ from src.stage6_pipeline.session_store import (
     is_session_expired
 )
 
+# ⚠️ CHỈ IMPORT RUNTIME HISTORY
 from src.stage4_risk_engine.risk_engine import (
-    load_history,
+    load_runtime_history,
     successful_login_count
 )
-
-DEMO_MODE = True
 
 
 def choose_demo_scenario():
@@ -36,7 +35,7 @@ def login_ui():
     user_id = input("Username: ")
 
     # ==================================================
-    # 1️⃣ CHECK USER TRƯỚC (KHÔNG DEMO)
+    # 1️⃣ SYSTEM CONTEXT (NO DEMO)
     # ==================================================
     base_context = collect_context(
         user_id=user_id,
@@ -44,56 +43,48 @@ def login_ui():
     )
 
     # ==================================================
-    # USER MỚI → AUTO OTP
+    # 2️⃣ TRUST CHECK (RUNTIME HISTORY)
     # ==================================================
-    if base_context.get("note") == "new_user":
+    df = load_runtime_history()
+    success_count = successful_login_count(df, user_id)
+
+    # ==================================================
+    # TRUSTED USER (>= 3 SUCCESS)
+    # ==================================================
+    if success_count >= 3:
         print("\n[System detected]")
-        print("User status : NEW USER")
-        print("Action      : OTP required")
+        print("User status : TRUSTED USER")
+        print("Action      : ALLOW (no OTP)")
 
         return {
             "user_id": user_id,
             "ip_address": base_context["ip_address"],
             "device_id": base_context["device_id"],
-            "login_hour": base_context["login_hour"],
-            "note": "unusual_device_or_time"
+            "login_hour": base_context["login_hour"]
+            # ❌ KHÔNG note → risk engine không ép OTP
         }
 
     # ==================================================
-    # 2️⃣ USER CŨ → KIỂM TRA TRUST
+    # NEW USER → ADAPTIVE AUTH (KHÔNG ÉP OTP)
     # ==================================================
-    df = load_history()
-    success_count = successful_login_count(df, user_id)
-
-    # ==================================================
-    # USER ĐÃ TRUST → KHÔNG DEMO, KHÔNG NOTE
-    # ==================================================
-    if success_count >= 3:
-        context = collect_context(
-            user_id=user_id,
-            demo_mode=False
-        )
-
+    if base_context.get("note") == "new_user":
         print("\n[System detected]")
-        print("User status : TRUSTED USER")
-        print(f"IP      : {context['ip_address']}")
-        print(f"Device  : {context['device_id']}")
-        print(f"Hour    : {context['login_hour']}")
-        print("Note    : (ignored – trusted user)")
+        print("User status : NEW USER")
+        print("Action      : Adaptive authentication")
 
         return {
             "user_id": user_id,
-            "ip_address": context["ip_address"],
-            "device_id": context["device_id"],
-            "login_hour": context["login_hour"]
+            "ip_address": base_context["ip_address"],
+            "device_id": base_context["device_id"],
+            "login_hour": base_context["login_hour"]
         }
 
     # ==================================================
-    # 3️⃣ USER CHƯA TRUST → CHO CHỌN DEMO SCENARIO
+    # UNTRUSTED USER → DEMO SCENARIO
     # ==================================================
     scenario = choose_demo_scenario()
 
-    context = collect_context(
+    demo_context = collect_context(
         user_id=user_id,
         scenario=scenario,
         demo_mode=True
@@ -101,17 +92,17 @@ def login_ui():
 
     print("\n[System detected]")
     print(f"User status : UNTRUSTED USER ({success_count}/3)")
-    print(f"IP      : {context['ip_address']}")
-    print(f"Device  : {context['device_id']}")
-    print(f"Hour    : {context['login_hour']}")
-    print(f"Note    : {context.get('note')}")
+    print(f"IP      : {demo_context['ip_address']}")
+    print(f"Device  : {demo_context['device_id']}")
+    print(f"Hour    : {demo_context['login_hour']}")
+    print(f"Note    : {demo_context.get('note')}")
 
     return {
         "user_id": user_id,
-        "ip_address": context["ip_address"],
-        "device_id": context["device_id"],
-        "login_hour": context["login_hour"],
-        "note": context.get("note")
+        "ip_address": demo_context["ip_address"],
+        "device_id": demo_context["device_id"],
+        "login_hour": demo_context["login_hour"],
+        "note": demo_context.get("note")   # ✅ CHỈ DEMO MỚI CÓ NOTE
     }
 
 
@@ -119,9 +110,6 @@ def main():
     current_user = None
 
     while True:
-        # ===============================
-        # AUTO SESSION TIMEOUT
-        # ===============================
         if current_user and is_session_expired(current_user):
             print("\n⛔ SESSION TIMEOUT")
             print("👉 Your session has expired. Please login again.\n")
@@ -140,9 +128,6 @@ def main():
 
         choice = input("Choose: ")
 
-        # ===============================
-        # LOGIN / LOGOUT
-        # ===============================
         if choice == "1":
             if current_user is None:
                 login_request = login_ui()
@@ -156,9 +141,6 @@ def main():
                 print(f"\n👋 User {current_user} logged out\n")
                 current_user = None
 
-        # ===============================
-        # SEND EVENT
-        # ===============================
         elif choice == "2":
             if not current_user:
                 print("⚠ Please login first")

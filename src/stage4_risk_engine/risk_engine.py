@@ -5,41 +5,52 @@ from datetime import datetime
 
 sys.path.append(os.path.abspath("."))
 
-from src.common.config import DATA_PATH
+# ===============================
+# PATH CONFIG
+# ===============================
+RAW_HISTORY_PATH = "data/raw/login_history.csv"      # dữ liệu hành vi nền (demo)
+RUNTIME_HISTORY_PATH = "data/login_history.csv"      # dữ liệu runtime (trust)
+
 
 # ===============================
-# LOAD LOGIN HISTORY
+# LOAD HISTORY
 # ===============================
-def load_history():
-    if not os.path.exists(DATA_PATH) or os.path.getsize(DATA_PATH) == 0:
+def load_raw_history():
+    if not os.path.exists(RAW_HISTORY_PATH) or os.path.getsize(RAW_HISTORY_PATH) == 0:
         return pd.DataFrame()
-    return pd.read_csv(DATA_PATH)
+    return pd.read_csv(RAW_HISTORY_PATH)
+
+
+def load_runtime_history():
+    if not os.path.exists(RUNTIME_HISTORY_PATH) or os.path.getsize(RUNTIME_HISTORY_PATH) == 0:
+        return pd.DataFrame()
+    return pd.read_csv(RUNTIME_HISTORY_PATH)
 
 
 # ===============================
-# CHECK FUNCTIONS
+# CHECK FUNCTIONS (DÙNG RAW)
 # ===============================
-def is_new_ip(df, user, ip):
-    if df.empty:
+def is_new_ip(df_raw, user, ip):
+    if df_raw.empty:
         return True
-    return ip not in df[df["user_id"] == user]["ip_address"].unique()
+    return ip not in df_raw[df_raw["user_id"] == user]["ip_address"].unique()
 
 
-def is_new_device(df, user, device):
-    if df.empty:
+def is_new_device(df_raw, user, device):
+    if df_raw.empty:
         return True
-    return device not in df[df["user_id"] == user]["device_id"].unique()
+    return device not in df_raw[df_raw["user_id"] == user]["device_id"].unique()
 
 
-def is_unusual_time(df, user, login_hour):
-    if df.empty:
+def is_unusual_time(df_raw, user, login_hour):
+    if df_raw.empty:
         return False
 
-    if "login_hour" in df.columns:
-        hours = df[df["user_id"] == user]["login_hour"]
-    elif "login_time" in df.columns:
+    if "login_hour" in df_raw.columns:
+        hours = df_raw[df_raw["user_id"] == user]["login_hour"]
+    elif "login_time" in df_raw.columns:
         hours = pd.to_datetime(
-            df[df["user_id"] == user]["login_time"]
+            df_raw[df_raw["user_id"] == user]["login_time"]
         ).dt.hour
     else:
         return False
@@ -50,70 +61,81 @@ def is_unusual_time(df, user, login_hour):
     return abs(hours.mean() - login_hour) > 6
 
 
-def too_many_fails(df, user):
-    if df.empty or "result" not in df.columns:
+# ===============================
+# CHECK FUNCTIONS (DÙNG RUNTIME)
+# ===============================
+def too_many_fails(df_runtime, user):
+    if df_runtime.empty or "result" not in df_runtime.columns:
         return False
 
-    recent = df[df["user_id"] == user].tail(5)
+    recent = df_runtime[df_runtime["user_id"] == user].tail(5)
     return (recent["result"] == "OTP_FAILED").sum() >= 3
 
 
-def successful_login_count(df, user):
+def successful_login_count(df_runtime, user):
     """
-    Đếm số lần login thành công
-    (SUCCESS + OTP_SUCCESS đều được tính)
+    Đếm số lần login thành công (SUCCESS + OTP_SUCCESS)
     """
-    if df.empty or "result" not in df.columns:
+    if df_runtime.empty or "result" not in df_runtime.columns:
         return 0
 
-    user_rows = df[df["user_id"] == user]
-
+    user_rows = df_runtime[df_runtime["user_id"] == user]
     return user_rows["result"].isin(
         ["SUCCESS", "OTP_SUCCESS"]
     ).sum()
 
 
 # ===============================
-# RISK ENGINE CORE
+# RISK ENGINE CORE (FINAL – CHUẨN BTL)
 # ===============================
 def calculate_risk(login_event):
-    df = load_history()
-    user = login_event["user_id"]
+    df_raw = load_raw_history()          # baseline behavior
+    df_runtime = load_runtime_history()  # trust & otp history
 
-    # ===============================
-    # 0️⃣ DEMO OVERRIDE (CHỈ CHO USER CHƯA TRUST)
-    # ===============================
-    success_count = successful_login_count(df, user)
+    user = login_event["user_id"]
     note = login_event.get("note")
 
-    if success_count < 3:
-        if note == "high_risk_attack":
-            return 90        # BLOCK
-        if note == "unusual_device_or_time":
-            return 50        # OTP
+    success_count = successful_login_count(df_runtime, user)
 
+    # ==================================================
+    # 1️⃣ TRUSTED USER (>= 3 SUCCESS)
+    # ==================================================
+    if success_count >= 3:
+        # chỉ OTP nhẹ nếu spam fail
+        if too_many_fails(df_runtime, user):
+            return 30
+        return 0
+
+    # ==================================================
+    # 2️⃣ DEMO OVERRIDE (CHỈ DÙNG KHI DEMO)
+    # ==================================================
+    if note == "high_risk_attack":
+        return 90          # BLOCK (demo)
+
+    if note == "unusual_device_or_time":
+        return 50          # OTP (demo)
+
+    # ==================================================
+    # 3️⃣ USER CHƯA TRUST → TÍNH RISK TỪ RAW
+    # ==================================================
     risk = 0
 
-    # ===============================
-    # 1️⃣ RISK TỪ HÀNH VI
-    # ===============================
-    if is_new_ip(df, user, login_event["ip_address"]):
+    if is_new_ip(df_raw, user, login_event["ip_address"]):
         risk += 40
 
-    if is_new_device(df, user, login_event["device_id"]):
+    if is_new_device(df_raw, user, login_event["device_id"]):
         risk += 40
 
-    if is_unusual_time(df, user, login_event["login_hour"]):
+    if is_unusual_time(df_raw, user, login_event["login_hour"]):
         risk += 20
 
-    if too_many_fails(df, user):
+    if too_many_fails(df_runtime, user):
         risk += 30
 
-    # ===============================
-    # 2️⃣ TRUST ACCUMULATION
-    # ===============================
-    if success_count >= 3:
-        risk = max(0, risk - 40)
+    # ==================================================
+    # 4️⃣ USER CHƯA TRUST → KHÔNG BAO GIỜ BLOCK
+    # ==================================================
+    risk = min(risk, 50)   # trần OTP
 
     return risk
 
