@@ -89,12 +89,11 @@ def calculate_risk(login_event):
 
     # TRUSTED USER (>= 3 SUCCESS)
     if success_count >= 3:
-        # chỉ OTP nhẹ nếu spam fail
         if too_many_fails(df_runtime, user):
             return 30
         return 0
 
-    # DEMO OVERRIDE (CHỈ DÙNG KHI DEMO)
+    # DEMO OVERRIDE
     if note == "high_risk_attack":
         return 90          # BLOCK (demo)
 

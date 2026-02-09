@@ -16,7 +16,7 @@ def send_event(user_id, event_name):
     Ghi event sau khi login
     """
 
-    # ⛔ Session timeout
+    # Session timeout
     if is_session_expired(user_id):
         print("\n⛔ SESSION TIMEOUT")
         print("👉 Your session has expired. Please login again.\n")

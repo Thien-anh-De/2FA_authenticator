@@ -34,7 +34,7 @@ def login_ui():
 
     user_id = input("Username: ")
 
-    # 1️⃣ SYSTEM CONTEXT (NO DEMO)
+    # SYSTEM CONTEXT
     base_context = collect_context(
         user_id=user_id,
         demo_mode=False
@@ -55,9 +55,8 @@ def login_ui():
             "ip_address": base_context["ip_address"],
             "device_id": base_context["device_id"],
             "login_hour": base_context["login_hour"]
-            # ❌ KHÔNG note → risk engine không ép OTP
         }
-    # NEW USER → ADAPTIVE AUTH (KHÔNG ÉP OTP)
+    # NEW USER → ADAPTIVE AUTH 
     if base_context.get("note") == "new_user":
         print("\n[System detected]")
         print("User status : NEW USER")
@@ -91,7 +90,7 @@ def login_ui():
         "ip_address": demo_context["ip_address"],
         "device_id": demo_context["device_id"],
         "login_hour": demo_context["login_hour"],
-        "note": demo_context.get("note")   # ✅ CHỈ DEMO MỚI CÓ NOTE
+        "note": demo_context.get("note")  
     }
 
 

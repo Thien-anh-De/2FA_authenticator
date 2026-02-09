@@ -5,3 +5,4 @@ timestamp,user_id,ip_address,device_id,login_hour,risk_score,decision,result
 2026-02-01T16:33:33.363993,ngoc.ha,10.0.79.225,Unknown_Device,16,50,OTP,OTP_SUCCESS
 2026-02-01T16:33:39.345769,ngoc.ha,10.0.79.225,Unknown_Device,16,50,OTP,OTP_SUCCESS
 2026-02-01T16:33:42.549129,ngoc.ha,10.0.79.225,Unknown_Device,16,0,ALLOW,SUCCESS
+2026-02-02T21:04:37.500952,nguyen.hoang.thienanh,113.190.45.23,Safari_iPhone_14,23,50,OTP,OTP_SUCCESS
