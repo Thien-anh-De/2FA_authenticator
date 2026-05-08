@@ -1,8 +1,6 @@
 timestamp,user_id,ip_address,device_id,login_hour,risk_score,decision,result
-2026-02-01T16:33:10.202983,nguyen.hoang.thienanh,113.190.45.24,Chrome_Windows_10,18,0,ALLOW,SUCCESS
-2026-02-01T16:33:19.176503,nguyen.hoang.thienanh,113.190.45.24,Safari_iPhone_14,23,50,OTP,OTP_SUCCESS
-2026-02-01T16:33:27.080146,ngoc.ha,10.0.79.225,Unknown_Device,16,50,OTP,OTP_SUCCESS
-2026-02-01T16:33:33.363993,ngoc.ha,10.0.79.225,Unknown_Device,16,50,OTP,OTP_SUCCESS
-2026-02-01T16:33:39.345769,ngoc.ha,10.0.79.225,Unknown_Device,16,50,OTP,OTP_SUCCESS
-2026-02-01T16:33:42.549129,ngoc.ha,10.0.79.225,Unknown_Device,16,0,ALLOW,SUCCESS
-2026-02-02T21:04:37.500952,nguyen.hoang.thienanh,113.190.45.23,Safari_iPhone_14,23,50,OTP,OTP_SUCCESS
+2026-05-08T17:49:19.415582,nguyen.hoang.thienanh,10.0.79.225,Unknown_Device,2,90,BLOCK,BLOCKED
+2026-05-08T17:56:50.688241,nguyen.hoang.thienanh,113.190.45.23,Chrome_Windows_10,21,20,ALLOW,SUCCESS
+2026-05-08T17:57:38.292274,ngoc.ha,10.0.79.225,Unknown_Device,17,50,OTP,OTP_SUCCESS
+2026-05-08T17:58:20.736083,cao.viet.bac,27.72.88.101,Safari_iPhone_14,23,50,OTP,OTP_SUCCESS
+2026-05-08T18:00:54.888541,nguyen.viet.anh,14.162.12.88,Safari_iPhone_14,23,50,OTP,OTP_FAILED
