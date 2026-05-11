@@ -3,7 +3,7 @@ import os
 from datetime import datetime, timedelta
 
 SESSION_PATH = "data/session_store.csv"
-SESSION_TIMEOUT_SECONDS = 60 # 1 phút
+SESSION_TIMEOUT_SECONDS = 20 # Giảm xuống 20s để dễ demo
 
 
 def _ensure_file():

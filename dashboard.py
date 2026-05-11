@@ -245,26 +245,40 @@ st.divider()
 st.markdown("## 👤 User Behavior Profiles")
 
 if total:
-    users = df_login["user_id"].unique()
-    tabs = st.tabs([f"  {u}  " for u in users])
+    # Filter out invalid users (NaN or empty)
+    users = [u for u in df_login["user_id"].unique() if pd.notna(u) and str(u).strip() != ""]
+    
+    if not users:
+        st.info("No valid user profiles found.")
+    else:
+        tabs = st.tabs([f"  {u}  " for u in users])
 
-    for tab, user in zip(tabs, users):
-        with tab:
-            user_df = df_login[df_login["user_id"] == user]
-            pcol1, pcol2, pcol3 = st.columns(3)
-            pcol1.metric("Total Logins",  len(user_df))
-            pcol2.metric("Avg Risk",      f"{round(user_df['risk_score'].mean(), 1)}/100")
-            pcol3.metric("Success Rate",  f"{round(len(user_df[user_df['result'].isin(['SUCCESS','OTP_SUCCESS'])]) / len(user_df) * 100, 0):.0f}%")
+        for tab, user in zip(tabs, users):
+            with tab:
+                user_df = df_login[df_login["user_id"] == user]
+                if len(user_df) > 0:
+                    pcol1, pcol2, pcol3 = st.columns(3)
+                    pcol1.metric("Total Logins",  len(user_df))
+                    
+                    avg_risk = user_df['risk_score'].mean()
+                    pcol2.metric("Avg Risk", f"{round(avg_risk, 1) if pd.notna(avg_risk) else 0}/100")
+                    
+                    # Success criteria includes BIOMETRIC_SUCCESS for V2
+                    success_rows = user_df[user_df['result'].isin(['SUCCESS', 'OTP_SUCCESS', 'BIOMETRIC_SUCCESS'])]
+                    success_rate = (len(success_rows) / len(user_df)) * 100
+                    pcol3.metric("Success Rate", f"{round(success_rate, 0):.0f}%")
 
-            sub1, sub2 = st.columns(2)
-            with sub1:
-                st.markdown("**Known IPs**")
-                for ip in user_df["ip_address"].unique():
-                    st.code(ip)
-            with sub2:
-                st.markdown("**Known Devices**")
-                for dev in user_df["device_id"].unique():
-                    st.code(dev)
+                    sub1, sub2 = st.columns(2)
+                    with sub1:
+                        st.markdown("**Known IPs**")
+                        for ip in user_df["ip_address"].unique():
+                            st.code(ip)
+                    with sub2:
+                        st.markdown("**Known Devices**")
+                        for dev in user_df["device_id"].unique():
+                            st.code(dev)
+                else:
+                    st.warning("No data for this user.")
 else:
     st.info("No user data yet.")
 

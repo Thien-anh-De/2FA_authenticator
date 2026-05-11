@@ -1,6 +1,8 @@
-timestamp,user_id,ip_address,device_id,login_hour,risk_score,decision,result
-2026-05-08T17:49:19.415582,nguyen.hoang.thienanh,10.0.79.225,Unknown_Device,2,90,BLOCK,BLOCKED
-2026-05-08T17:56:50.688241,nguyen.hoang.thienanh,113.190.45.23,Chrome_Windows_10,21,20,ALLOW,SUCCESS
-2026-05-08T17:57:38.292274,ngoc.ha,10.0.79.225,Unknown_Device,17,50,OTP,OTP_SUCCESS
-2026-05-08T17:58:20.736083,cao.viet.bac,27.72.88.101,Safari_iPhone_14,23,50,OTP,OTP_SUCCESS
-2026-05-08T18:00:54.888541,nguyen.viet.anh,14.162.12.88,Safari_iPhone_14,23,50,OTP,OTP_FAILED
+timestamp,user_id,ip_address,device_id,login_hour,risk_score,decision,result,engine_version
+2026-05-09T17:09:48.339775,nguyen.hoang.thienanh,172.16.0.100,Edge_Windows_10,15,35,BIOMETRIC,BIOMETRIC_SUCCESS,V2_ML
+2026-05-09T17:09:59.030743,nguyen.hoang.thienanh,172.16.0.100,Edge_Windows_10,15,0,ALLOW,SUCCESS,V2_ML
+2026-05-09T17:10:07.062176,nguyen.hoang.thienanh,10.0.79.225,Unknown_Device,2,100,BLOCK,BLOCKED,V2_ML
+2026-05-09T17:10:15.768596,1,10.0.79.225,Unknown_Device,17,45,BIOMETRIC,BIOMETRIC_FAILED,V2_ML
+2026-05-09T17:12:54.237413,,10.0.79.225,Unknown_Device,17,45,BIOMETRIC,BIOMETRIC_SUCCESS,V2_ML
+2026-05-09T17:13:14.683969,1,10.0.79.225,Unknown_Device,17,45,BIOMETRIC,BIOMETRIC_SUCCESS,V2_ML
+2026-05-09T17:13:34.624210,nguyen.hoang.thienanh,113.190.45.24,MacBook_Pro_M3_Unknown,23,60,BIOMETRIC,BIOMETRIC_FAILED,V2_ML

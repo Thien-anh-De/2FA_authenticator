@@ -1,6 +1,6 @@
 files = {
     "data/login_history.csv":
-        "timestamp,user_id,ip_address,device_id,login_hour,risk_score,decision,result\n",
+        "timestamp,user_id,ip_address,device_id,login_hour,risk_score,decision,result,engine_version\n",
     "data/otp_store.csv":
         "user_id,otp,created_at\n",
     "data/session_store.csv":

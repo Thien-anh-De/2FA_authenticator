@@ -62,15 +62,16 @@ def choose_demo_scenario():
     table.add_row("  [1]", "🟢  Normal Login",    "[green]Low  (0–39)[/green]",  "[green]ALLOW[/green]")
     table.add_row("  [2]", "🟡  Suspicious Login", "[yellow]Mid  (40–69)[/yellow]", "[yellow]OTP[/yellow]")
     table.add_row("  [3]", "🔴  Attack Login",     "[red]High (70+)[/red]",      "[red]BLOCK[/red]")
+    table.add_row("  [4]", "☕  Coffee Shop",      "[yellow]Mid  (40–69)[/yellow]", "[yellow]OTP[/yellow]")
 
     console.print(table)
 
     choice = Prompt.ask(
         "[bold cyan]Select scenario[/bold cyan]",
-        choices=["1", "2", "3"],
+        choices=["1", "2", "3", "4"],
         default="1"
     )
-    return {"1": "normal", "2": "suspicious", "3": "attack"}[choice]
+    return {"1": "normal", "2": "suspicious", "3": "attack", "4": "coffee_shop"}[choice]
 
 
 def login_ui():

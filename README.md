@@ -1,57 +1,133 @@
-# 🔐 2FA Adaptive Authentication System
+# 🔐 Adaptive Authentication System (Risk-based 2FA)
 
-An intelligent, context-aware 2-Factor Authentication (2FA) system that balances high security with a frictionless user experience. 
+[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![ML](https://img.shields.io/badge/Machine%20Learning-Isolation%20Forest-orange.svg)](https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.IsolationForest.html)
+[![Security](https://img.shields.io/badge/Security-FIDO2%20Simulated-green.svg)](#)
+[![License](https://img.shields.io/badge/License-MIT-lightgrey.svg)](#)
 
-Instead of statically requiring an OTP (One-Time Password) for every login, this system uses a **Dynamic Risk Engine** to analyze the user's context (IP Address, Device, Time) and determines the appropriate security action: `ALLOW` (pass), `OTP` (verify), or `BLOCK` (prevent).
-
----
-
-## ✨ Key Features
-
-*   **🧠 Dynamic Risk Engine**: Calculates a risk score based on historical baseline behavior (`raw_history`) and current context.
-*   **🤝 Trust Building System**: Automatically learns user habits. If a new device is verified via OTP successfully 3 times, it becomes a "Trusted Device" and no longer requires OTP.
-*   **🛡️ Adaptive Security Actions**:
-    *   **Low Risk (<40)**: Instant access (`ALLOW`).
-    *   **Medium Risk (40-69)**: Step-up authentication (`OTP`).
-    *   **High Risk (≥70)**: Immediate access denial (`BLOCK`).
-*   **💻 Rich Terminal UI (TUI)**: A beautiful, interactive console interface built with the `rich` library, featuring animated risk analysis and color-coded panels.
-*   **📊 Live Admin Dashboard**: A real-time web dashboard built with `Streamlit` to monitor login events, risk distribution, active sessions, and behavioral profiles.
+An intelligent, context-aware authentication framework that balances robust security with a frictionless user experience. This project demonstrates the evolution of authentication from static rules to dynamic AI-driven anomaly detection.
 
 ---
 
-## 🛠️ Prerequisites
+## 🏗️ Dual-Architecture Design
 
-Ensure you have Python 3.8+ installed. You will need the following libraries:
+This repository features a side-by-side implementation of two distinct authentication paradigms, allowing for direct comparison of security efficacy and user friction.
 
-```bash
-pip install pandas rich streamlit
+| Feature | **Version 1 (Legacy Core)** | **Version 2 (Next-Gen AI)** |
+| :--- | :--- | :--- |
+| **Risk Engine** | Static Rule-Based (Heuristics) | AI-Powered (Isolation Forest) |
+| **Verification** | 6-Digit Time-based OTP | Passwordless Biometric Push |
+| **User Experience** | Moderate Friction (Manual entry) | Zero Friction (Tap-to-approve) |
+| **Adaptability** | Manual updates required | Self-learning from behavior |
+
+---
+
+## ✨ Key Capabilities
+
+### 🤖 AI-Driven Anomaly Detection (V2)
+The heart of the system is an **Isolation Forest** machine learning model. Unlike traditional security systems that look for "known bad" patterns, our AI learns what "normal" behavior looks like for each user and identifies statistical outliers (anomalies) in real-time.
+*   **Contextual Signals**: Analyzes IP Address, Device Fingerprint, and Login Time.
+*   **Adaptive Learning**: Recognizes "Trusted" patterns (e.g., a user logging in from a new coffee shop they frequent) without manual intervention.
+
+### 📱 Passwordless Biometrics (V2)
+Replaces vulnerable and cumbersome OTPs with a simulated **FIDO2/WebAuthn** experience.
+*   **Push Verification**: Users receive a simulated biometric prompt on their "trusted device".
+*   **Cryptographic Binding**: Simulates the security of public-key cryptography where the private key never leaves the user's device.
+
+### 🏢 Legacy Rule-Based Security (V1)
+A robust implementation of traditional risk-based authentication.
+*   **Scoring Heuristics**: Assigns risk scores based on IP changes (+40), new devices (+40), and unusual hours (+20).
+*   **Trust Maturation**: Devices graduate to "Trusted" status after 3 successful OTP verifications.
+
+### 📊 Real-Time Analytics Dashboard
+Dual Streamlit dashboards provide deep visibility into the system's decision-making process:
+*   **Live Event Stream**: Watch login attempts and security actions in real-time.
+*   **Risk Heatmaps**: Visualize how the AI perceives different login scenarios.
+*   **V1 vs V2 Comparison**: Directly compare how rules vs. AI handle the same attack scenario.
+
+---
+
+## 🗺️ System Architecture
+
+```mermaid
+graph TD
+    subgraph "Data Acquisition"
+        A[User Login Attempt] --> B[Context Collector]
+        B --> C{Signal Extraction}
+        C -->|IP, Device, Time| D[Historical Baseline]
+    end
+
+    subgraph "Adaptive Risk Engine"
+        D --> E{Engine Selection}
+        E -->|V1: Rules| F[Static Heuristics]
+        E -->|V2: AI| G[Isolation Forest Model]
+        
+        F --> H[Risk Score]
+        G --> H[Risk Score]
+    end
+
+    subgraph "Smart Enforcement"
+        H --> I{Threshold Logic}
+        I -->|Low Risk| J[✅ ALLOW - Frictionless]
+        I -->|Medium Risk| K[🟡 CHALLENGE - OTP/Biometric]
+        I -->|High Risk| L[❌ BLOCK - Security Alert]
+    end
+
+    subgraph "Feedback Loop"
+        J --> M[Update User Profile]
+        K -->|Success| M
+        M --> D
+    end
 ```
 
 ---
 
-## 🚀 Installation & Usage
+## 🚀 Getting Started
 
-1. **Clone the repository** (or navigate to the project directory):
+### Prerequisites
+*   Python 3.8 or higher
+*   Pip package manager
+
+### Installation
+1. Clone the repository:
    ```bash
-   cd 2FA_Authenticator
+   git clone https://github.com/your-repo/2FA_authenticator.git
+   cd 2FA_authenticator
    ```
 
-2. **Reset the database** (Optional, to start with a clean slate):
+2. Install dependencies:
+   ```bash
+   pip install pandas rich streamlit scikit-learn
+   ```
+
+3. (Optional) Initialize/Reset the data:
    ```bash
    python reset_csv.py
    ```
 
-3. **Run the Live Admin Dashboard**:
-   Open a terminal and run the Streamlit app. It will automatically open in your web browser.
-   ```bash
-   streamlit run dashboard.py
-   ```
+---
 
-4. **Run the Interactive Login Console**:
-   Open a *second* terminal and run the main application to simulate user logins.
-   ```bash
-   python system_console.py
-   ```
+## 🎮 Running the Demo
+
+For the best experience, we recommend running the system in a split-terminal environment.
+
+### 🟢 Version 1: Rule-Based OTP
+```bash
+# Terminal 1: User Console
+python system_console.py
+
+# Terminal 2: Admin Dashboard
+streamlit run dashboard.py
+```
+
+### 🟣 Version 2: ML + Passwordless
+```bash
+# Terminal 1: User Console
+python system_console_v2.py
+
+# Terminal 2: Comparison Dashboard
+streamlit run dashboard_v2.py
+```
 
 ---
 
@@ -59,41 +135,37 @@ pip install pandas rich streamlit
 
 ```text
 2FA_Authenticator/
-├── data/                       # CSV databases acting as the system's memory
-│   ├── raw/
-│   │   └── login_history.csv   # Baseline behavioral data (known IPs, devices)
-│   ├── data_events.csv         # Post-login activity logs
-│   ├── login_history.csv       # Runtime login attempts and decisions
-│   ├── otp_store.csv           # Temporary OTP storage
+├── data/                       # Behavioral memory (CSV-based)
+│   ├── login_history.csv       # Unified history for both engines
+│   ├── data_events.csv         # Post-authentication activity
 │   └── session_store.csv       # Active session management
+│
 ├── src/
-│   ├── common/
-│   │   └── context_collector.py # Simulates collecting IP, Device, and Time
-│   ├── stage4_risk_engine/
-│   │   └── risk_engine.py       # Core logic: calculates risk scores and decisions
-│   ├── stage5_otp/
-│   │   ├── login_flow.py        # Orchestrates the login steps (Risk -> Decision -> OTP)
-│   │   └── otp_service.py       # Generates and verifies 6-digit OTPs
-│   └── stage6_pipeline/
-│       ├── data_pipeline.py     # Records events for authenticated users
-│       └── session_store.py     # Manages session timeouts and states
-├── dashboard.py                # Streamlit Web Dashboard (Admin God-View)
-├── system_console.py           # Main Entry Point (Rich Terminal UI)
-└── reset_csv.py                # Utility to wipe data and reset the system
+│   ├── stage4_risk_engine/     # The "Brains"
+│   │   ├── risk_engine.py      # Rule-based logic (V1)
+│   │   └── ml_engine.py        # Isolation Forest implementation (V2)
+│   ├── stage5_otp/             # Verification Services
+│   │   ├── otp_service.py      # 6-digit TOTP simulation
+│   │   └── biometric_service.py# Passwordless push notification simulator
+│   └── v2/                     # Modern Flow Orchestration
+│       └── login_flow_v2.py    # AI-first authentication pipeline
+│
+├── system_console_v2.py        # Main entry point (V2)
+└── dashboard_v2.py             # Streamlit analytics (V2)
 ```
 
 ---
 
-## 🎬 Demo Scenarios
+## 🎭 Simulation Scenarios
 
-When running `system_console.py`, you can test various scenarios:
+When using the consoles, you can trigger specific behavioral patterns to test the engines:
 
-1.  **Normal Login**: System recognizes a trusted user/device -> Grants immediate access.
-2.  **Suspicious Login**: System detects an unknown device -> Requests OTP -> Grants access upon correct entry.
-3.  **Attack Login**: System detects high-risk context -> Blocks access immediately to protect the account.
-4.  **Trust Building**: Successfully log in with OTP 3 times on a new device. On the 4th attempt, the system will recognize it as trusted and grant access without OTP.
+1.  **Usual Activity**: Login from a known IP and device during normal hours.
+2.  **Minor Anomaly**: Logging in from a new device (Triggers OTP/Biometric).
+3.  **Traveling (Coffee Shop)**: New IP but same device (V2 AI may grant access while V1 Rules will challenge).
+4.  **Credential Stuffing Attack**: Rapid logins from unknown locations at 3 AM (Triggers immediate BLOCK).
 
 ---
 
 ## 📝 License
-This project was created for educational and demonstration purposes.
+This project is licensed under the MIT License - see the LICENSE file for details. Created for educational purposes to demonstrate modern cybersecurity patterns.
